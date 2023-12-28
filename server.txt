@@ -1,0 +1,102 @@
+// server
+const express = require("express");
+const mongoose = require("mongoose");
+const path = require("path");
+
+// Schema
+const userSchema = new mongoose.Schema({
+    email: String,
+    password: String,
+});
+// users
+const UserModel = mongoose.model("User", userSchema);
+
+const server = express();
+
+// middleware , application level built-in middleware
+server.use(express.json())
+server.use(express.static(path.resolve("public")))
+
+server.use("/products", myMiddleware)
+
+
+function myMiddleware(req, res, next){
+    res.send("In Application level middleware")
+    // next()
+}
+
+
+
+// /products/new
+// /products/add
+// /products/123132
+
+server.get("/",  (req, res, next) => {
+   
+    res.sendFile(path.resolve("./index.html"));
+});
+
+server.get("/products", (req, res, next) => {
+    res.send('In Products route')
+})
+server.get("/products/new", (req, res, next) => {
+    res.send('In Products route')
+})
+
+
+
+
+server.post("/create-user", async (req, res) => {
+   let {email, password} = req.body
+   let newuser = await UserModel.create({
+    email ,
+    password
+   })
+   console.log(newuser)
+    res.send("Created user")
+});
+
+
+server.get("/get-all-user" ,  async (req, res) => {
+    let users = await UserModel.find()
+    res.send(users)
+})
+
+server.put("/update-user/:userid", async(req, res)  => {
+    let id = req.params.userid
+    // console.log(id)
+    // first find the user with the given id
+    // 
+    let updatedUser = await UserModel.findByIdAndUpdate(id , {
+        $set : {
+            password : "test password"
+        }
+    } , {new : true} )
+    res.send(updatedUser)
+})
+
+
+server.delete("/delete-user/:userid", async(req, res)  => {
+    let id = req.params.userid
+    // console.log(id)
+    // first find the user with the given id
+    // 
+    let deletedUser = await UserModel.findByIdAndDelete(id)
+    res.send(deletedUser)
+})
+// server.delete("/delete-user")
+
+mongoose.connect("mongodb://127.0.0.1:27017/backend3").then(() => {
+    console.log("Connected to MongoDB");
+    server.listen(5000, () => {
+        console.log("Server started on PORT :  5000");
+    });
+});
+
+
+// error handling middleware
+
+// connect database using mongoose
+// basic crud operation
+
+// url-shortner - long url
