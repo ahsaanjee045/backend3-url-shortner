@@ -1,23 +1,15 @@
-// MVC - Model view Controller
-// routes - /users
-//          /products
-//          /orders
-// utils - common utility functions
-// db - database connection
-
-
 const express = require("express")
 const connectDB = require("./db/connectDB")
 const urlRoutes = require("./routes/url.routes")
-const productRoutes = require("./routes/product.routes")
-
+const userRoutes = require("./routes/user.routes")
 
 const app = express()
 
 app.use(express.json())
 
 app.use("/url", urlRoutes)
-// app.use("/products", productRoutes)
+app.use("/user", userRoutes)
+
 
 app.get('/', (req, res) => {
     res.status(200)
@@ -25,8 +17,6 @@ app.get('/', (req, res) => {
         message : "Welcome to URL Shortener backend api!"
     })
 })
-
-
 
 
 connectDB().then(() => {

@@ -22,6 +22,26 @@ const createShortURL = async (req, res) => {
     })
 }
 
+
+const getLongURL = async (req, res) => {
+    // get shortId from url
+    let shortid = req.params.shortid
+
+    // find long url matching with shortID in database
+    let urlObject = await URL.findOne({shortID : shortid})
+
+    if(!urlObject){
+        return res.status(404).json({
+            message : "No Long URL found with the id."
+        })
+    }
+
+    res.redirect(urlObject.originalURL)
+
+    // redirect user to the matching long url
+}
+
 module.exports = {
-    createShortURL
+    createShortURL,
+    getLongURL
 }
