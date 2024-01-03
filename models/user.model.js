@@ -1,5 +1,13 @@
 const mongoose = require("mongoose");
 
+/**
+ * User model
+ *
+ * @type {Schema}
+ * @property {string} username - The user's name
+ * @property {string} email - The user's email address
+ * @property {string} password - The user's password
+ */
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
