@@ -1,9 +1,16 @@
+// const dotenv = require("dotenv")
+// dotenv.config()
+require("dotenv").config()
+
+
 const express = require("express")
 const connectDB = require("./db/connectDB")
 const urlRoutes = require("./routes/url.routes")
 const userRoutes = require("./routes/user.routes")
 const CustomError = require("./lib/CustomError")
 const { notFound } = require("./lib/notFound")
+const errorHandlerMiddleware = require("./middlewares/errorHandlerMiddleware")
+
 
 
 const app = express()
@@ -26,19 +33,19 @@ app.all('/', (req, res, next) => {
 app.all("*", notFound)
 
 
-app.use((err, req, res, next) => {
-    // console.log(err)
-    console.log(err.statusCode, err.success, err.message)
-    res.status(err.statusCode).json({
-        success : err.success,
-        error : err.message,
-        stackTrace : err.stack
+app.use(errorHandlerMiddleware)
+
+console.log(process.env.NODE_ENV)
+
+const PORT = process.env.PORT || 5000
+connectDB().then(() => {
+    app.listen(PORT, () => {
+        console.log(`Server started on port ${PORT}`)
     })
 })
 
 
-connectDB().then(() => {
-    app.listen(5000, () => {
-        console.log('Server started on port 5000')
-    })
+process.on("unhandledRejection", () => {
+    console.log("Shutting down server due to some unhandled Promise rejection")
+    process.exit(1)
 })

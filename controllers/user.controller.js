@@ -1,93 +1,67 @@
+const CustomError = require("../lib/CustomError");
+const asyncErrorHandler = require("../lib/asyncErrorHandler");
 const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 
-const registerUser = async (req, res) => {
-    try {
-        // try to register a user
-        let data = req.body;
-        if (!data.email || !data.password) {
-            return res.status(400).json({
-                message: "Invalid email or password",
-            });
-        }
-        // check if the user is already registered
-        let user = await User.findOne({
-            email: data.email,
-        });
+const registerUser = asyncErrorHandler(async (req, res, next) => {
 
-        if (user) {
-            return res.status(400).json({
-                message: "User already registered. Try with another email!",
-            });
-        }
-
-        user = await User.create({
-            email: data.email,
-            password: data.password,
-            username: data.username || "",
-        });
-
-        return res.status(201).json({
-            message: "Registration Success!",
-            data: user,
-        });
-    } catch (error) {
-        res.status(500).json({
-            error: error.message,
-        });
+    let data = req.body;
+    if (!data.email || !data.password) {
+        return next(new CustomError("Invalid email or password", 400))
     }
-};
+   
+    // let user = await User.findOne({
+    //     email: data.email,
+    // });
 
-const loginUser = async (req, res) => {
-    try {
-        let data = req.body;
-        if (!data.email || !data.password) {
-            return res.status(400).json({
-                message: "Invalid email or password",
-            });
-        }
+    // if (user) {
+    //     return next(new CustomError("User Already registered", 400))
+    // }
 
-        let user = await User.findOne({
-            email: data.email,
-        });
+    let user = await User.create({
+        email: data.email,
+        password: data.password,
+        username: data.username || "",
+    });
 
-        if (!user) {
-            return res.status(400).json({
-                message: "User not registered. Try Registring first",
-            });
-        }
+    return res.status(201).json({
+        message: "Registration Success!",
+        data: user,
+    });
+});
 
-        if (user.password !== data.password) {
-            return res.status(400).json({
-                message: "Invalid Credentials",
-            });
-        }
-
-        // console.log(req.session.isAuth)
-        // req.session.isAuthenticated = true
-        // res.cookie("token", "12837618276", {
-        //     httpOnly : true,
-        //     maxAge :  10 * 60 * 60 * 1000  // cannot be accessed by client side javascript
-        // })
-        let token = jwt.sign(
-            { _id: user._id, username: user.username },
-            "thisisaverysecuresignature",
-            {
-                expiresIn: "1d",
-            }
-        );
-
-        return res.status(200).json({
-            message: "Logged in Successfully.",
-            data: user,
-            token,
-        });
-    } catch (error) {
-        res.status(500).json({
-            error: error.message,
-        });
+const loginUser = asyncErrorHandler(async (req, res, next) => {
+    let data = req.body;
+    if (!data.email || !data.password) {
+        return next(new CustomError("Invalid email or password", 400))
     }
-};
+
+    let user = await User.findOne({
+        email: data.email,
+    });
+
+    if (!user) {
+        return next(new CustomError("User not registered", 400))
+    }
+
+    if (user.password !== data.password) {
+        return next(new CustomError("Invalid Credentials", 401))
+    }
+
+    let token = jwt.sign(
+        { _id: user._id, username: user.username },
+        process.env.JWT_SECRET,
+        {
+            expiresIn: 30,
+        }
+    );
+
+    return res.status(200).json({
+        message: "Logged in Successfully.",
+        data: user,
+        token,
+    });
+});
 
 module.exports = {
     registerUser,
