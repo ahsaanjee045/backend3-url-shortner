@@ -4,21 +4,20 @@ const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 
 const registerUser = asyncErrorHandler(async (req, res, next) => {
-
     let data = req.body;
     if (!data.email || !data.password) {
-        return next(new CustomError("Invalid email or password", 400))
+        return next(new CustomError("Invalid email or password", 400));
     }
-   
-    // let user = await User.findOne({
-    //     email: data.email,
-    // });
 
-    // if (user) {
-    //     return next(new CustomError("User Already registered", 400))
-    // }
+    let user = await User.findOne({
+        email: data.email,
+    });
 
-    let user = await User.create({
+    if (user) {
+        return next(new CustomError("User Already registered", 400));
+    }
+
+    user = await User.create({
         email: data.email,
         password: data.password,
         username: data.username || "",
@@ -33,7 +32,7 @@ const registerUser = asyncErrorHandler(async (req, res, next) => {
 const loginUser = asyncErrorHandler(async (req, res, next) => {
     let data = req.body;
     if (!data.email || !data.password) {
-        return next(new CustomError("Invalid email or password", 400))
+        return next(new CustomError("Invalid email or password", 400));
     }
 
     let user = await User.findOne({
@@ -41,11 +40,11 @@ const loginUser = asyncErrorHandler(async (req, res, next) => {
     });
 
     if (!user) {
-        return next(new CustomError("User not registered", 400))
+        return next(new CustomError("User not registered", 400));
     }
 
     if (user.password !== data.password) {
-        return next(new CustomError("Invalid Credentials", 401))
+        return next(new CustomError("Invalid Credentials", 401));
     }
 
     let token = jwt.sign(
