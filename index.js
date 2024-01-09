@@ -1,7 +1,7 @@
 // const dotenv = require("dotenv")
 // dotenv.config()
 require("dotenv").config();
-
+const path = require("path")
 const express = require("express");
 const connectDB = require("./db/connectDB");
 const urlRoutes = require("./routes/url.routes");
@@ -10,6 +10,7 @@ const CustomError = require("./lib/CustomError");
 const { notFound } = require("./lib/notFound");
 const errorHandlerMiddleware = require("./middlewares/errorHandlerMiddleware");
 const cors = require("cors");
+const imageRoutes = require("./routes/filehandling.routes");
 
 // cors
 
@@ -46,10 +47,14 @@ app.use(
       
     })
 );
+
+app.use(express.static(path.resolve("public")))
 app.use(express.json());
+
 
 app.use("/url", urlRoutes);
 app.use("/user", userRoutes);
+app.use("/image", imageRoutes)
 
 app.all("/", (req, res, next) => {
     res.status(200);

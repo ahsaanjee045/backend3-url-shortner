@@ -8,16 +8,12 @@
     </head>
     <body>
         <h1>Server homepage</h1>
-        <button onclick="sendRequest(event)">Send Request</button>
+
+
+        <input type="file">
+       
         <script>
-            function sendRequest(e) {
-                fetch("http://localhost:8000", {
-                    credentials : "include"
-                })
-                    .then((res) => res.json())
-                    .then((data) => console.log(data))
-                    .catch(console.error);
-            }
+           
         </script>
     </body>
 </html>
